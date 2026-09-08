@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FBF7F0">
+<title>꿀퀴즈 인더바이블</title>
+<meta name="description" content="꿀보다 성경 — 오늘 읽은 본문으로 푸는 열 문항. 퍼듀교회 양육팀">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBF7F0;
+    --ink:#2A2118;
+    --ink-soft:#6B5D4D;
+    --ink-faint:#9C8E7C;
+    --rule:#E5DACA;
+    --honey:#B8821F;
+    --honey-wash:#F4EBD8;
+    --sage:#4F6B52;
+    --sage-wash:#EAF0E9;
+    --clay:#A6543F;
+    --clay-wash:#F6E9E4;
+    --serif:"Noto Serif KR",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:17px;line-height:1.72;
+    padding:0 18px calc(28px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:33rem;margin:0 auto}
+
+  #bar-track{position:fixed;top:0;left:0;right:0;height:3px;background:transparent;z-index:10}
+  #bar-fill{height:100%;width:0;background:var(--honey);transition:width .45s cubic-bezier(.4,0,.2,1)}
+
+  header{padding:calc(40px + env(safe-area-inset-top)) 0 0}
+  .program{color:var(--honey);font-size:.88rem;font-weight:600;margin:0 0 9px}
+  .mark{font-family:var(--serif);font-weight:600;font-size:2.05rem;letter-spacing:-.02em;line-height:1.24;margin:0 0 8px}
+  .date{color:var(--ink-soft);font-size:.92rem;margin:0 0 26px}
+
+  .passage{
+    font-family:var(--serif);font-size:1.18rem;line-height:1.52;
+    padding:18px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+    margin:0 0 20px;
+  }
+  .passage span{display:block;color:var(--ink-soft);font-size:.85rem;font-family:var(--sans);margin-bottom:6px}
+  .lede{color:var(--ink-soft);font-size:.96rem;margin:0 0 30px}
+  .start{
+    font-family:inherit;font-size:1.02rem;font-weight:500;
+    background:var(--ink);color:var(--paper);border:0;
+    width:100%;padding:17px 0;border-radius:2px;cursor:pointer;
+  }
+  .start:active{background:#40342A}
+
+  .quietlink{
+    display:block;text-align:center;margin:26px auto 0;
+    background:none;border:0;padding:8px;cursor:pointer;font-family:inherit;
+    color:var(--ink-faint);font-size:.9rem;text-decoration:none;
+  }
+  .quietlink:active{color:var(--ink)}
+
+  .notice{
+    border:1px solid var(--rule);border-radius:3px;
+    padding:22px;margin:0 0 18px;color:var(--ink-soft);font-size:.97rem;
+  }
+  .notice p{margin:0}
+  .notice .big{font-family:var(--serif);font-size:1.3rem;color:var(--ink);margin:0 0 10px}
+
+  main{padding:calc(40px + env(safe-area-inset-top)) 0 0}
+  .count{color:var(--ink-faint);font-size:.83rem;margin:0 0 5px}
+  .ref{color:var(--honey);font-size:.87rem;font-weight:600;margin:0 0 13px}
+  .q{font-family:var(--serif);font-size:1.24rem;line-height:1.62;font-weight:400;margin:0 0 24px}
+  .opts{display:flex;flex-direction:column;gap:10px;margin:0 0 20px}
+  .opt{
+    font-family:var(--serif);font-size:1.06rem;text-align:left;
+    background:transparent;color:var(--ink);
+    border:1px solid var(--rule);border-radius:2px;
+    padding:16px 18px;min-height:56px;cursor:pointer;line-height:1.5;
+    transition:border-color .18s,background .18s;
+  }
+  .opt:active:not(:disabled){background:var(--honey-wash)}
+  .opt:disabled{cursor:default}
+  .opt.miss{opacity:.42;text-decoration:line-through;text-decoration-color:var(--clay)}
+  .opt.right{border-color:var(--sage);background:var(--sage-wash)}
+  .opt.shown{border-color:var(--sage)}
+  .opt:focus-visible{outline:2px solid var(--honey);outline-offset:2px}
+
+  .hintbtn{
+    background:none;border:0;padding:8px 0;cursor:pointer;font-family:inherit;
+    color:var(--ink-soft);font-size:.92rem;border-bottom:1px solid var(--rule);
+  }
+  .panel{border-radius:2px;padding:17px 18px;margin:16px 0 0;font-size:.98rem}
+  .panel.hint{background:var(--honey-wash)}
+  .panel.good{background:var(--sage-wash)}
+  .panel.again{background:var(--clay-wash)}
+  .panel .tag{font-size:.83rem;font-weight:600;margin:0 0 7px}
+  .hint .tag{color:var(--honey)}
+  .good .tag{color:var(--sage)}
+  .again .tag{color:var(--clay)}
+  .verse{font-family:var(--serif);font-size:1.02rem;line-height:1.74;margin:0}
+  .panel p.note{margin:0;line-height:1.74;color:var(--ink)}
+
+  .next{
+    margin:20px 0 0;font-family:inherit;font-size:1rem;font-weight:500;
+    background:var(--ink);color:var(--paper);border:0;
+    width:100%;padding:16px 0;border-radius:2px;cursor:pointer;
+  }
+  .next:active{background:#40342A}
+
+  .done .mark{font-size:1.7rem;margin-bottom:24px}
+  .memo{border-left:3px solid var(--honey);padding:6px 0 6px 20px;margin:0 0 24px}
+  .memo .who{color:var(--honey);font-size:.86rem;font-weight:600;margin:0 0 8px}
+  .memo .txt{font-family:var(--serif);font-size:1.4rem;line-height:1.6;margin:0}
+  .memo .cite{color:var(--ink-soft);font-size:.9rem;margin:10px 0 0}
+  .closing{color:var(--ink-soft);font-size:.96rem;margin:0 0 26px}
+  .ends{display:flex;flex-direction:column;gap:10px}
+  .ghost{
+    display:block;width:100%;text-align:center;
+    background:none;border:1px solid var(--rule);color:var(--ink-soft);
+    font-family:inherit;font-size:.96rem;padding:15px 0;
+    border-radius:2px;cursor:pointer;text-decoration:none;
+  }
+  .ghost:active{background:var(--honey-wash);color:var(--ink)}
+
+  .back{
+    background:none;border:0;padding:0 0 14px;cursor:pointer;font-family:inherit;
+    color:var(--ink-faint);font-size:.88rem;
+  }
+  .back:active{color:var(--ink)}
+
+  /* 지난 퀴즈 */
+  .calhead{display:flex;align-items:center;justify-content:space-between;margin:28px 0 12px}
+  .calhead h2{font-family:var(--serif);font-size:1.12rem;font-weight:600;margin:0}
+  .nav{display:flex;gap:6px}
+  .nav button{
+    width:44px;height:44px;border:1px solid var(--rule);background:transparent;
+    border-radius:2px;color:var(--ink-soft);font-size:1.05rem;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-family:inherit;
+  }
+  .nav button:disabled{opacity:.3;cursor:default}
+  .nav button:active:not(:disabled){background:var(--honey-wash)}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .wd{text-align:center;font-size:.76rem;color:var(--ink-faint);padding:4px 0 6px}
+  .cell{
+    aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+    font-size:.95rem;border-radius:2px;color:var(--ink-faint);
+    border:0;background:transparent;font-family:inherit;padding:0;
+  }
+  .cell.blank{visibility:hidden}
+  .cell.on{color:var(--ink);background:var(--honey-wash);font-weight:500;position:relative;cursor:pointer}
+  .cell.on:active{background:#EBDFC4}
+  .cell.today{box-shadow:inset 0 0 0 1.5px var(--honey)}
+  .cell.on::after{
+    content:"";position:absolute;bottom:6px;left:50%;transform:translateX(-50%);
+    width:3px;height:3px;border-radius:50%;background:var(--honey);
+  }
+  .cell.today.on::after{display:none}
+  .list{margin:26px 0 0;border-top:1px solid var(--rule)}
+  .row{
+    display:flex;gap:14px;align-items:baseline;width:100%;text-align:left;
+    padding:15px 0;border:0;border-bottom:1px solid var(--rule);
+    background:transparent;font-family:inherit;color:inherit;cursor:pointer;
+  }
+  .row .d{flex:0 0 3.5rem;color:var(--honey);font-size:.88rem;font-weight:600}
+  .row .p{font-family:var(--serif);font-size:1.02rem;line-height:1.5;margin:0}
+  .row:active{background:var(--honey-wash)}
+  .none{color:var(--ink-faint);font-size:.93rem;padding:18px 0;margin:0}
+
+  footer{
+    max-width:33rem;margin:48px auto 0;padding-top:18px;
+    border-top:1px solid var(--rule);
+    color:var(--ink-faint);font-size:.82rem;line-height:1.6;
+  }
+  footer b{color:var(--ink-soft);font-weight:600}
+
+  .fade{animation:rise .32s ease-out}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.fade{animation:none}#bar-fill{transition:none}}
+  @media (min-width:600px){
+    body{font-size:16px}
+    .mark{font-size:2.3rem}
+    .start,.next{width:auto;padding-left:34px;padding-right:34px}
+    .ends{flex-direction:row}
+    .ghost{width:auto;padding-left:26px;padding-right:26px}
+  }
+</style>
+</head>
+<body>
+
+<div id="bar-track"><div id="bar-fill"></div></div>
+<div class="wrap"><div id="stage"></div></div>
+
+<footer>
+  <b>퍼듀교회 양육팀</b><br>
+  꿀보다 성경 · 함께 읽고 함께 새깁니다
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════
+   꿀퀴즈 인더바이블 — 화면 코드
+   문항은 days/ 폴더의 날짜별 JSON에 있습니다.
+   이 파일은 문항을 추가할 때 수정하지 않습니다.
+══════════════════════════════════════════════ */
+
+const TZ  = "America/Indiana/Indianapolis";   // 교회 기준 시간대
+const WD  = ["일","월","화","수","목","금","토"];
+const stage = document.getElementById("stage");
+const fill  = document.getElementById("bar-fill");
+
+let DAYS = [];                 // [{date, passage}] 최신순
+let byDate = {};
+let todayKey = "";
+
+let day = null, quiz = [], idx = 0, tries = 0, view = [], answerAt = 0;
+const cache = {};
+
+/* ── 날짜 ───────────────────────────── */
+function tzToday(){
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ, year:"numeric", month:"2-digit", day:"2-digit"
+  }).format(new Date());
+}
+function label(key){
+  const [y,m,d] = key.split("-").map(Number);
+  return `${y}년 ${m}월 ${d}일 ${WD[new Date(y, m-1, d).getDay()]}요일`;
+}
+function isFuture(key){ return key > todayKey; }
+function toTop(){ window.scrollTo(0, 0); }
+
+/* ── 데이터 ─────────────────────────── */
+async function loadIndex(){
+  const r = await fetch(`days/index.json?t=${Date.now()}`);
+  if (!r.ok) throw new Error("index");
+  const j = await r.json();
+  DAYS = (j.days || []).slice().sort((a,b) => b.date.localeCompare(a.date));
+  byDate = Object.fromEntries(DAYS.map(d => [d.date, d]));
+}
+async function loadDay(key){
+  if (cache[key]) return cache[key];
+  const r = await fetch(`days/${key}.json?t=${Date.now()}`);
+  if (!r.ok) throw new Error("day");
+  const j = await r.json();
+  cache[key] = j;
+  return j;
+}
+
+/* ── 화면: 오늘 ─────────────────────── */
+async function home(){
+  location.hash = "";
+  fill.style.width = "0";
+
+  if (byDate[todayKey]) return openDay(todayKey, true);
+
+  stage.innerHTML = `
+    <header class="fade">
+      <p class="program">꿀보다 성경</p>
+      <h1 class="mark">꿀퀴즈 인더바이블</h1>
+      <div class="notice">
+        <p class="big">${label(todayKey)}</p>
+        <p>오늘 퀴즈는 아직 올라오지 않았습니다. 잠시 뒤 다시 열어 주세요.</p>
+      </div>
+      <button class="quietlink" onclick="archive()">지난 퀴즈 보기</button>
+    </header>`;
+  toTop();
+}
+
+async function openDay(key, isToday){
+  if (!byDate[key]) return notFound(key);
+  if (isFuture(key))  return locked(key);
+
+  fill.style.width = "0";
+  stage.innerHTML = `<header class="fade"><p class="program">꿀보다 성경</p>
+    <h1 class="mark">꿀퀴즈 인더바이블</h1>
+    <p class="date">${label(key)}</p>
+    <p class="lede">불러오는 중입니다…</p></header>`;
+
+  let d;
+  try { d = await loadDay(key); }
+  catch { return failed(); }
+
+  day  = d;
+  quiz = d.quiz || [];
+  location.hash = isToday ? "" : key;
+
+  const back = isToday ? "" : `<button class="back" onclick="archive()">‹ 지난 퀴즈</button>`;
+  const foot = isToday
+    ? `<button class="quietlink" onclick="archive()">지난 퀴즈 보기</button>`
+    : "";
+
+  stage.innerHTML = `
+    <header class="fade">
+      ${back}
+      <p class="program">꿀보다 성경</p>
+      <h1 class="mark">꿀퀴즈 인더바이블</h1>
+      <p class="date">${label(key)}</p>
+      <p class="passage"><span>${isToday ? "오늘의 본문" : "그날의 본문"}</span>${(d.passage||"").replace(/, /g,"<br>")}</p>
+      <p class="lede">${quiz.length}문항입니다. 틀리면 본문을 다시 볼 수 있는 힌트가 나오고, 한 번 더 풀 수 있습니다. 아무것도 기록되지 않습니다.</p>
+      <button class="start" onclick="begin()">시작하기</button>
+      ${foot}
+    </header>`;
+  toTop();
+}
+
+function locked(key){
+  stage.innerHTML = `
+    <header class="fade">
+      <button class="back" onclick="archive()">‹ 지난 퀴즈</button>
+      <p class="program">꿀보다 성경</p>
+      <h1 class="mark">꿀퀴즈 인더바이블</h1>
+      <div class="notice">
+        <p class="big">${label(key)}</p>
+        <p>아직 열리지 않은 날입니다. 그날 아침에 다시 찾아와 주세요.</p>
+      </div>
+      <button class="quietlink" onclick="home()">오늘 퀴즈로 가기</button>
+    </header>`;
+  toTop();
+}
+function notFound(key){
+  stage.innerHTML = `
+    <header class="fade">
+      <p class="program">꿀보다 성경</p>
+      <h1 class="mark">꿀퀴즈 인더바이블</h1>
+      <div class="notice">
+        <p class="big">${label(key)}</p>
+        <p>그날의 퀴즈를 찾지 못했습니다.</p>
+      </div>
+      <button class="quietlink" onclick="home()">오늘 퀴즈로 가기</button>
+    </header>`;
+  toTop();
+}
+function failed(){
+  stage.innerHTML = `
+    <header class="fade">
+      <p class="program">꿀보다 성경</p>
+      <h1 class="mark">꿀퀴즈 인더바이블</h1>
+      <div class="notice">
+        <p class="big">불러오지 못했습니다</p>
+        <p>인터넷 연결을 확인하시고 새로고침해 주세요.</p>
+      </div>
+    </header>`;
+  toTop();
+}
+
+/* ── 화면: 지난 퀴즈 ────────────────── */
+let cur = null;
+function archive(){
+  location.hash = "past";
+  fill.style.width = "0";
+  if (!cur){
+    const [y,m] = todayKey.split("-").map(Number);
+    cur = new Date(y, m-1, 1);
+  }
+  stage.innerHTML = `
+    <div class="fade">
+      <header>
+        <button class="back" onclick="home()">‹ 오늘 퀴즈</button>
+        <p class="program">꿀보다 성경</p>
+        <h1 class="mark">지난 퀴즈</h1>
+      </header>
+      <div class="calhead">
+        <h2 id="calTitle"></h2>
+        <div class="nav">
+          <button id="prev" aria-label="이전 달">‹</button>
+          <button id="next" aria-label="다음 달">›</button>
+        </div>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="list" id="list"></div>
+    </div>`;
+  document.getElementById("prev").onclick = () => { cur.setMonth(cur.getMonth()-1); calendar(); };
+  document.getElementById("next").onclick = () => { cur.setMonth(cur.getMonth()+1); calendar(); };
+  calendar();
+  toTop();
+}
+
+function calendar(){
+  const y = cur.getFullYear(), m = cur.getMonth();
+  const mm = String(m+1).padStart(2,"0");
+  document.getElementById("calTitle").textContent = `${y}년 ${m+1}월`;
+
+  const grid = document.getElementById("grid");
+  grid.innerHTML = WD.map(w => `<div class="wd">${w}</div>`).join("");
+  const first = new Date(y, m, 1).getDay();
+  const last  = new Date(y, m+1, 0).getDate();
+  for (let i = 0; i < first; i++)
+    grid.insertAdjacentHTML("beforeend", `<span class="cell blank">·</span>`);
+  for (let d = 1; d <= last; d++){
+    const k = `${y}-${mm}-${String(d).padStart(2,"0")}`;
+    const open = byDate[k] && !isFuture(k);
+    const cls = ["cell"];
+    if (open) cls.push("on");
+    if (k === todayKey) cls.push("today");
+    grid.insertAdjacentHTML("beforeend", open
+      ? `<button class="${cls.join(" ")}" onclick="openDay('${k}')">${d}</button>`
+      : `<span class="${cls.join(" ")}">${d}</span>`);
+  }
+
+  const rows = DAYS.filter(x => x.date.startsWith(`${y}-${mm}`) && !isFuture(x.date));
+  document.getElementById("list").innerHTML = rows.length
+    ? rows.map(x => `<button class="row" onclick="openDay('${x.date}')">
+         <span class="d">${m+1}.${Number(x.date.slice(8))}</span>
+         <p class="p">${x.passage}</p>
+       </button>`).join("")
+    : `<p class="none">이 달에는 퀴즈가 없습니다.</p>`;
+
+  const nowY = Number(todayKey.slice(0,4)), nowM = Number(todayKey.slice(5,7)) - 1;
+  document.getElementById("next").disabled = (y > nowY) || (y === nowY && m >= nowM);
+}
+
+/* ── 문항 ───────────────────────────── */
+function begin(){ idx = 0; render(); toTop(); }
+
+function shuffle(item){
+  const pairs = item.opts.map((t,i) => ({ t, right: i === item.a }));
+  for (let i = pairs.length-1; i > 0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [pairs[i], pairs[j]] = [pairs[j], pairs[i]];
+  }
+  view = pairs.map(p => p.t);
+  answerAt = pairs.findIndex(p => p.right);
+}
+
+function render(){
+  tries = 0;
+  const item = quiz[idx];
+  shuffle(item);
+  fill.style.width = (idx / quiz.length * 100) + "%";
+  stage.innerHTML = `
+    <main class="fade">
+      <p class="count">${idx+1} / ${quiz.length}</p>
+      <p class="ref">${item.ref}</p>
+      <p class="q">${item.q}</p>
+      <div class="opts" id="opts"></div>
+      <button class="hintbtn" id="hintbtn">힌트 보기</button>
+      <div id="feed"></div>
+    </main>`;
+  const box = document.getElementById("opts");
+  view.forEach((t,i) => {
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = t;
+    b.onclick = () => pick(i,b);
+    box.appendChild(b);
+  });
+  document.getElementById("hintbtn").onclick = showHint;
+}
+
+function showHint(){
+  const item = quiz[idx];
+  const btn = document.getElementById("hintbtn");
+  if (btn) btn.style.display = "none";
+  const feed = document.getElementById("feed");
+  if (feed.querySelector(".hint")) return;
+  const el = document.createElement("div");
+  el.className = "panel hint fade";
+  el.innerHTML = `<p class="tag">${item.hintRef}</p><p class="verse">${item.hintText}</p>`;
+  feed.appendChild(el);
+}
+
+function pick(i, btn){
+  const item = quiz[idx];
+  tries++;
+  if (i === answerAt){
+    btn.classList.add("right");
+    document.querySelectorAll(".opt").forEach(o => o.disabled = true);
+    reveal(tries === 1 ? "맞았습니다" : "이번엔 맞았습니다", item.note);
+    return;
+  }
+  btn.classList.add("miss");
+  btn.disabled = true;
+  if (tries === 1){
+    showHint();
+    const el = document.createElement("div");
+    el.className = "panel again fade";
+    el.innerHTML = `<p class="tag">다시 한 번</p><p class="note">위 구절을 읽고 다시 골라 보세요.</p>`;
+    document.getElementById("feed").appendChild(el);
+  } else {
+    document.querySelectorAll(".opt").forEach(o => o.disabled = true);
+    document.querySelectorAll(".opt")[answerAt].classList.add("shown");
+    showHint();
+    reveal(`정답은 "${view[answerAt]}"입니다`, item.note);
+  }
+}
+
+function reveal(tag, note){
+  const feed = document.getElementById("feed");
+  const stale = feed.querySelector(".again");
+  if (stale) stale.remove();
+  const el = document.createElement("div");
+  el.className = "panel good fade";
+  el.innerHTML = `<p class="tag">${tag}</p><p class="note">${note}</p>`;
+  feed.appendChild(el);
+
+  const btn = document.createElement("button");
+  btn.className = "next";
+  btn.textContent = (idx === quiz.length-1) ? "마치기" : "다음 문항";
+  btn.onclick = () => {
+    idx++;
+    if (idx >= quiz.length) finish(); else { render(); toTop(); }
+  };
+  feed.appendChild(btn);
+  btn.scrollIntoView({ behavior:"smooth", block:"nearest" });
+}
+
+function finish(){
+  const M = day.memory || {};
+  fill.style.width = "100%";
+  stage.innerHTML = `
+    <div class="done fade">
+      <header>
+        <h1 class="mark">이제 말씀 그대로 걸어갑시다</h1>
+        <div class="memo">
+          <p class="who">오늘 마음에 담을 한 절</p>
+          <p class="txt">${M.text || ""}</p>
+          <p class="cite">${M.cite || ""}</p>
+        </div>
+        <p class="closing">${M.closing || ""}</p>
+        <div class="ends">
+          <button class="ghost" onclick="begin()">처음부터 다시 풀기</button>
+          <button class="ghost" onclick="archive()">지난 퀴즈 보기</button>
+        </div>
+      </header>
+    </div>`;
+  toTop();
+}
+
+/* ── 시작 ───────────────────────────── */
+(async function boot(){
+  todayKey = tzToday();
+  stage.innerHTML = `<header><p class="program">꿀보다 성경</p>
+    <h1 class="mark">꿀퀴즈 인더바이블</h1>
+    <p class="lede">불러오는 중입니다…</p></header>`;
+  try { await loadIndex(); }
+  catch { return failed(); }
+
+  const h = (location.hash || "").replace("#","");
+  if (/^\d{4}-\d{2}-\d{2}$/.test(h)) openDay(h);
+  else if (h === "past") archive();
+  else home();
+})();
+
+window.addEventListener("hashchange", () => {
+  const h = (location.hash || "").replace("#","");
+  if (/^\d{4}-\d{2}-\d{2}$/.test(h) && (!day || day.date !== h)) openDay(h);
+});
+</script>
+</body>
+</html>
