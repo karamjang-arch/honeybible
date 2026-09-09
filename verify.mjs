@@ -43,7 +43,10 @@ const files = readdirSync('days')
 for (const k of listed)
   if (!files.includes(k)) errors.push(`index.json 에 ${k} 가 있는데 days/${k}.json 파일이 없습니다.`);
 for (const k of files)
-  if (!listed.includes(k)) warns.push(`days/${k}.json 파일이 있는데 index.json 목록에 없습니다. 화면에 뜨지 않습니다.`);
+  if (!listed.includes(k)) errors.push(
+    `days/${k}.json 파일이 있는데 index.json 목록에 없습니다. ` +
+    `이 상태로 올리면 교인 화면에 그날 퀴즈가 아예 뜨지 않습니다. ` +
+    `index.json 의 days 배열 맨 앞에 { "date": "${k}", "passage": "..." } 를 추가하세요.`);
 
 /* ── 2. 각 날짜 ──────────────────────────────── */
 const report = [];
@@ -68,7 +71,7 @@ for (const k of files) {
 
   const inList = (list.days || []).find(x => x.date === k);
   if (inList && inList.passage !== day.passage)
-    warns.push(at('index.json 의 passage 와 날짜 파일의 passage 가 다릅니다.'));
+    errors.push(at(`index.json 의 passage("${inList.passage}")와 날짜 파일의 passage("${day.passage}")가 다릅니다. 둘은 글자까지 같아야 합니다.`));
 
   const M = day.memory;
   if (!M) errors.push(at('memory 가 없습니다.'));
@@ -114,12 +117,22 @@ for (const k of files) {
   report.push({ k, n: Q.length, p: day.passage });
 }
 
-/* ── 3. 보고 ─────────────────────────────────── */
+/* ── 3. 오늘 확인 ────────────────────────────── */
+const todayKey = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Indiana/Indianapolis',
+  year: 'numeric', month: '2-digit', day: '2-digit'
+}).format(new Date());
+const todayReady = listed.includes(todayKey) && files.includes(todayKey);
+
+/* ── 4. 보고 ─────────────────────────────────── */
 report.sort((a, b) => b.k.localeCompare(a.k));
 console.log('\n꿀퀴즈 인더바이블 — 검증 결과\n' + '─'.repeat(46));
 console.log(`등록된 날짜 ${report.length}일`);
 for (const r of report) console.log(`  ${r.k}  ${String(r.n).padStart(2)}문항  ${r.p}`);
 console.log('─'.repeat(46));
+console.log(todayReady
+  ? `오늘(${todayKey}) 퀴즈 — 준비됨`
+  : `오늘(${todayKey}) 퀴즈 — 없음. 교인 화면에는 "아직 올라오지 않았습니다" 가 뜹니다.`);
 
 if (warns.length) {
   console.log(`\n△ 경고 ${warns.length}건 (배포는 가능합니다)`);
