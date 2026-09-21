@@ -207,6 +207,7 @@
 ══════════════════════════════════════════════ */
 
 const TZ  = "America/Indiana/Indianapolis";   // 교회 기준 시간대
+const OPEN_HOUR = 7;                          // 그날 퀴즈가 열리는 시각 (교회 기준 오전 7시)
 const WD  = ["일","월","화","수","목","금","토"];
 const stage = document.getElementById("stage");
 const fill  = document.getElementById("bar-fill");
@@ -220,9 +221,12 @@ const cache = {};
 
 /* ── 날짜 ───────────────────────────── */
 function tzToday(){
+  /* 오전 7시 이전에는 아직 어제로 본다. 현재 시각을 OPEN_HOUR 만큼 뒤로 밀어
+     교회 기준 시간대로 날짜를 읽으면, 7시 정각에 새 날짜로 넘어간다. */
+  const shifted = new Date(Date.now() - OPEN_HOUR * 3600 * 1000);
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: TZ, year:"numeric", month:"2-digit", day:"2-digit"
-  }).format(new Date());
+  }).format(shifted);
 }
 function label(key){
   const [y,m,d] = key.split("-").map(Number);

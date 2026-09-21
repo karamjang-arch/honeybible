@@ -118,10 +118,11 @@ for (const k of files) {
 }
 
 /* ── 3. 오늘 확인 ────────────────────────────── */
+/* 화면과 같은 기준: 교회 시간대 오전 7시에 날짜가 바뀐다 */
 const todayKey = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'America/Indiana/Indianapolis',
   year: 'numeric', month: '2-digit', day: '2-digit'
-}).format(new Date());
+}).format(new Date(Date.now() - 7 * 3600 * 1000));
 const todayReady = listed.includes(todayKey) && files.includes(todayKey);
 
 /* ── 4. 보고 ─────────────────────────────────── */
