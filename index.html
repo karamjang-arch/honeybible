@@ -208,7 +208,7 @@
 
 const TZ  = "America/Indiana/Indianapolis";   // 교회 기준 시간대
 const OPEN_HOUR = 7;                          // 그날 퀴즈가 열리는 시각 (교회 기준 오전 7시)
-const WD  = ["일","월","화","수","목","금","토"];
+const WD  = ["주일","월","화","수","목","금","토"];
 const stage = document.getElementById("stage");
 const fill  = document.getElementById("bar-fill");
 
@@ -230,7 +230,8 @@ function tzToday(){
 }
 function label(key){
   const [y,m,d] = key.split("-").map(Number);
-  return `${y}년 ${m}월 ${d}일 ${WD[new Date(y, m-1, d).getDay()]}요일`;
+  const dow = new Date(y, m-1, d).getDay();
+  return `${y}년 ${m}월 ${d}일 ${WD[dow]}${dow === 0 ? "" : "요일"}`;
 }
 function isFuture(key){ return key > todayKey; }
 function toTop(){ window.scrollTo(0, 0); }
